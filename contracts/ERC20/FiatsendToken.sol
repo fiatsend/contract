@@ -8,11 +8,11 @@ import {ERC20Pausable} from "@openzeppelin/contracts/token/ERC20/extensions/ERC2
 import {ERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-contract Fiatsend is ERC20, ERC20Burnable, ERC20Pausable, Ownable, ERC20Permit {
+contract FiatsendToken is ERC20, ERC20Burnable, ERC20Pausable, Ownable, ERC20Permit {
     constructor(address initialOwner)
-        ERC20("Fiatsend", "FSEND")
+        ERC20("FiatsendToken", "FSEND")
         Ownable(initialOwner)
-        ERC20Permit("Fiatsend")
+        ERC20Permit("FiatsendToken")
     {
         _mint(msg.sender, 10000 * 10 ** decimals());
     }
