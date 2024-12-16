@@ -39,7 +39,7 @@ contract FiatSend {
     }
 
     // Core function to receive stablecoins and trigger GHS disbursement
-    function depositStablecoin(uint256 amount) external {
+    function offRamp(uint256 amount) external {
         require(isVerifiedUser[msg.sender], "User is not verified");
         require(amount > 0, "Amount must be greater than zero");
 

@@ -1,12 +1,14 @@
 const { ethers } = require("hardhat");
 
 async function main() {
-  const stablecoinAddress = "0xddb68f1c22310084390853d5eb21313a78066480";
+  const stablecoinAddress = "0xAE134a846a92CA8E7803Ca075A1a0EE854Cd6168";
   const conversionRate = 17;
+  const ghsFiatAddress = "0x84fd74850911d28c4b8a722b6ce8aa0df802f08a";
 
   const fiatsend = await ethers.deployContract("FiatSend", [
     stablecoinAddress,
     conversionRate,
+    ghsFiatAddress,
   ]);
   await fiatsend.waitForDeployment();
   console.log("fiatsend contract deployed to:", fiatsend.target);
