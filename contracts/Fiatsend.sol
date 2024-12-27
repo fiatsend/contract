@@ -20,6 +20,7 @@ contract FiatSend {
     mapping(address => bool) public isWhitelisted;
     mapping(address => uint8) public kycLevel;
     mapping(address => uint256) public monthlySpent;
+    mapping(address => uint256) public totalOffRampAmount;
 
     uint256 constant LEVEL_1_LIMIT = 100000 * 10**18; // 100,000 USDT per month
     uint256 constant LEVEL_2_LIMIT = 500000 * 10**18; // 500,000 USDT per month
@@ -57,31 +58,36 @@ contract FiatSend {
         emit KYCVerified(user, level);
     }
 
-    // Core function for off-ramping
+    // Core function with KYC and limit checks
     function offRamp(uint256 amount) external {
         require(amount > 0, "Amount must be greater than zero");
-        require(isWhitelisted[msg.sender], "User is not KYC verified");
 
         uint8 level = kycLevel[msg.sender];
         uint256 limit = _getTransactionLimit(level);
-        require(monthlySpent[msg.sender] + amount <= limit, "Exceeds monthly limit");
+
+        if (level == 0) {
+            // Unverified user: enforce one-time limit
+            require(totalOffRampAmount[msg.sender] + amount <= limit, "Exceeds one-time limit for unverified user");
+        } else {
+            // Verified user: enforce monthly limit
+            require(monthlySpent[msg.sender] + amount <= limit, "Exceeds monthly limit");
+        }
 
         IERC20 stablecoin = IERC20(stablecoinAddress);
         require(stablecoin.allowance(msg.sender, address(this)) >= amount, "Insufficient allowance");
         require(stablecoin.balanceOf(msg.sender) >= amount, "Insufficient balance");
 
-        // Transfer stablecoin from user to contract
-        require(stablecoin.transferFrom(msg.sender, address(this), amount), "Stablecoin transfer failed");
+        require(stablecoin.transferFrom(msg.sender, address(this), amount), "Transfer failed");
 
-        // Calculate equivalent GHSFIAT amount
-        uint256 ghsFiatAmount =  (amount * conversionRate) / 100;
+        uint256 ghsFiatAmount = (amount * conversionRate) / 100;
         require(ghsFiatToken.balanceOf(address(this)) >= ghsFiatAmount, "Insufficient GHSFIAT");
-
-        // Transfer GHSFIAT to user
         require(ghsFiatToken.transfer(msg.sender, ghsFiatAmount), "GHSFIAT transfer failed");
 
-        // Update user’s monthly spent amount
-        monthlySpent[msg.sender] += amount;
+        if (level == 0) {
+            totalOffRampAmount[msg.sender] += amount;
+        } else {
+            monthlySpent[msg.sender] += amount;
+        }
 
         emit StablecoinReceived(msg.sender, amount, ghsFiatAmount);
     }
