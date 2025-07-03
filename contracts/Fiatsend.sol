@@ -32,9 +32,9 @@ contract FiatSend is Initializable, UUPSUpgradeable, OwnableUpgradeable, Reentra
     mapping(address => uint256) public monthlySpent;
     mapping(address => uint256) public totalOffRampAmount;
 
-    uint256 constant LEVEL_1_LIMIT = 100_000e18;
+    uint256 constant LEVEL_1_LIMIT = 10_000e18; //monthly limit should be variable
     uint256 constant LEVEL_2_LIMIT = 500_000e18;
-    uint256 constant UNVERIFIED_LIMIT = 1_000e18;
+    uint256 constant UNVERIFIED_LIMIT = 1_00e18;
 
     // Events
     event StablecoinReceived(address indexed user, uint256 amount, uint256 ghsAmount);
